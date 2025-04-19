@@ -641,3 +641,15 @@ func (ps *PlatformService) DatabaseTypeAndSchemaVersion() (string, string, error
 
 	return model.SafeDereference(ps.Config().SqlSettings.DriverName), strconv.Itoa(schemaVersion), nil
 }
+
+func (ps *PlatformService) Broadcast(eventType model.WebsocketEventType, data map[string]interface{}, broadcast *model.WebsocketBroadcast) {
+	event := model.NewWebSocketEvent(eventType, "", "", "", nil, "")
+	event.SetData(data)
+	if broadcast != nil {
+		event.SetBroadcast(broadcast)
+	}
+
+	for _, hub := range ps.hubs {
+		hub.Broadcast(event)
+	}
+}
